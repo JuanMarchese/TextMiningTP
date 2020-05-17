@@ -16,7 +16,7 @@ __regexSimpleUrl = re.compile(r"\shttps?://\S+")
 # https://www.regextester.com/95875
 __regexHashtagsAndMentions = re.compile(r"\s([@#][\w_-]+)")
 __regexMultipleSpaces = re.compile(r"\s+")
-__regexMultiplePunctuations = re.compile(r"\.+")
+__regexMultiplePunctuations = re.compile(r"[\.,:;}{()]+")
 
 def replaceUrls(text):
     
