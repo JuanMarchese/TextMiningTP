@@ -8,7 +8,7 @@ from datetime import timedelta
 
 # Esta función es para poder asegurarme que el archivo cambió cuando lo importo en google colab
 def v():
-    print("2020-05-24 14:13")
+    print("2020-05-27 07:37")
 
 def loadDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/"):
     
@@ -138,12 +138,16 @@ def getMonth(date):
     except:
       return 0
 
-def addIsSpamColumnBasedOnTextRepeatedness(df, countThreshold = 2):
+def addIsSpamColumn(df, countThreshold = 2, languageProbaThreshold = 0.5):
     df_countByText = df.groupby('text').size().reset_index(name = 'count')
     df_countByText["is_spam"] = df_countByText['count'] >= countThreshold
     df_countByText.drop(['count'], axis = 1, inplace = True)
     
-    return df.merge(df_countByText, left_on='text', right_on='text')
+    df = df.merge(df_countByText, left_on='text', right_on='text')
+
+    df['is_spam'] = df['is_spam'] | (df['language_proba'] <= languageProbaThreshold)
+
+    return df
 
 def normalizeHashtagsAndMentions(text):
     # Algunos hashtags están separados de la palabra, y lo mismo con los mentions.
