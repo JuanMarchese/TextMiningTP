@@ -164,7 +164,7 @@ __regexHashtagsAndMentions = re.compile(r"\s([@#][\w_-]+)")
 __regexHashtags = re.compile(r"\s([#][\w_-]+)")
 __regexMentions = re.compile(r"\s([@][\w_-]+)")
 __regexMultipleSpaces = re.compile(r"\s+")
-__regexMultiplePunctuations = re.compile(r"[\.,:;}{()]+")
+__regexMultiplePunctuations = re.compile(r"([\.,:;}{()])\1+")
 
 def replaceUrls(text, new = ""):
     
@@ -174,7 +174,7 @@ def replaceUrls(text, new = ""):
         return ""
 
     # Reemplazamos los puntos duplicados por un solo punto (si hay muchos puntos se rompe la regex de búsqueda de urls).
-    text = __regexMultiplePunctuations.sub(".", text)
+    text = __regexMultiplePunctuations.sub("\1", text)
     text = __regexSimpleUrl.sub(" " + new, text) # Acá reemplazamos por un espacio porque los captura la regex
     return __regexUrl.sub(new, text)
 
@@ -199,3 +199,9 @@ def replaceHashtagsAndMentions(text):
 def replaceUrlsHashtagsAndMentions(text):
     return replaceHashtagsAndMentions(replaceUrls(text))
 
+def normalizeForTokenization(text):
+    text = replaceUrls(text.lower(), new=" <URL> ")
+    # Por ahora no los reemplazamos para probar el tokenizador que tiene en cuenta los hashtags
+    # text = f.replaceHashtags(text, new=" <HASHTAG> ")
+    text = replaceMentions(text, new=" <MENTION> ")
+    return __regexMultipleSpaces.sub(" ", text).strip()
