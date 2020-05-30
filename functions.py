@@ -9,7 +9,7 @@ import numpy as np
 
 # Esta función es para poder asegurarme que el archivo cambió cuando lo importo en google colab
 def v():
-    print("2020-05-30 09:45")
+    print("2020-05-30 11:33")
 
 def loadDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/"):
     
@@ -199,6 +199,15 @@ __regexMentions = re.compile(r"\s([@][\w_-]+)")
 __regexMultipleSpaces = re.compile(r"\s+")
 __regexMultiplePunctuations = re.compile(r"([\.,:;}{()])\1+")
 
+# Numeros
+__regexPriceDollar = re.compile(r'\$(?:\d+[,\.])?(?:\d+[,\.])?\d+[,\.]\d+')
+__regexPriceK = re.compile(r'(?:\d+[,\.])?(?:\d+[,\.])?\d+[,\.]\d+k')
+__regexFloat = re.compile(r'(?:\d+[,\.])?(?:\d+[,\.])?\d+[,\.]\d+')
+__regexFloatStartingWithDot = re.compile(r'\.\d+')
+__regexIntegerPriceDollar = re.compile(r'$(?:\d+)?\d+')
+__regexIntegerPriceK = re.compile(r'(?:\d+)?\d+k')
+__regexInteger = re.compile(r'(?:\d+)?\d+')
+
 def replaceUrls(text, new = ""):
     
     # Algunos textos no tienen ningún espacio (ni \r\t\n\f). Los consideramos basura, porque no vamos a poder
@@ -232,9 +241,19 @@ def replaceHashtagsAndMentions(text):
 def replaceUrlsHashtagsAndMentions(text):
     return replaceHashtagsAndMentions(replaceUrls(text))
 
-def normalizeForTokenization(text):
+def normalizeForTokenization(text, normalizeHashtags = True, normalizeNumbers = True):
     text = replaceUrls(text.lower(), new=" <URL> ")
-    # Por ahora no los reemplazamos para probar el tokenizador que tiene en cuenta los hashtags
-    # text = f.replaceHashtags(text, new=" <HASHTAG> ")
+    if (normalizeHashtags):
+        text = replaceHashtags(text, new=" <HASHTAG> ")
     text = replaceMentions(text, new=" <MENTION> ")
+
+    if (normalizeNumbers):
+        text = __regexPriceDollar.sub(" <PRICE>", text)
+        text = __regexPriceK.sub(" <PRICE>", text)
+        text = __regexFloat.sub(" <NUMBER> ", text)
+        text = __regexFloatStartingWithDot.sub(" <NUMBER> ", text)
+        text = __regexIntegerPriceDollar.sub(" <PRICE>", text)
+        text = __regexIntegerPriceK.sub(" <PRICE>", text)
+        text = __regexInteger.sub(" <NUMBER> ", text)
+
     return __regexMultipleSpaces.sub(" ", text).strip()
