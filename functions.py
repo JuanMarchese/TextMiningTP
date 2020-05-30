@@ -9,7 +9,7 @@ import numpy as np
 
 # Esta función es para poder asegurarme que el archivo cambió cuando lo importo en google colab
 def v():
-    print("2020-05-30 11:33")
+    print("2020-05-30 14:50")
 
 def loadDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/"):
     
@@ -125,8 +125,8 @@ def loadSampleDataSetFromSpread(gc, url):
     df = df.iloc[1:]
     df.drop(['date', 'month', 'name', 'is_news_spam'], axis = 1, inplace = True)
     df = df[df['is_spam'] != '']
-    df['is_news'] = df['is_news'].apply(lambda x: np.NaN if x == '' else x)
-    df['sentiment'] = df['sentiment'].apply(lambda x: np.NaN if x == '' else x)
+    df['is_news'] = df['is_news'].apply(lambda x: np.NaN if x == '' or x == ' ' else x)
+    df['sentiment'] = df['sentiment'].apply(lambda x: np.NaN if x == '' or x == ' ' else x)
     schema = {
         'text': df['text'].astype(str),
         'is_spam': df['is_spam'].astype(float),
