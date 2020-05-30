@@ -5,10 +5,11 @@ import time
 import csv
 import random
 from datetime import timedelta
+import numpy as np
 
 # Esta función es para poder asegurarme que el archivo cambió cuando lo importo en google colab
 def v():
-    print("2020-05-27 07:37")
+    print("2020-05-30 09:45")
 
 def loadDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/"):
     
@@ -103,6 +104,38 @@ def loadDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/"
         #    print (file_name)
     
     return pd.concat(dataframe_list, axis=0, ignore_index=True)
+
+
+def loadSampleDataSetFromSpread(gc, url):
+    """
+    Carga el sample dataset desde una google spread.
+    Antes de usar hay que agregar las siguientes líneas:
+
+    from google.colab import auth
+    auth.authenticate_user()
+    import gspread
+    from oauth2client.client import GoogleCredentials
+    # Esta es la variable que tiene que mandarse como primer parámetro
+    gc = gspread.authorize(GoogleCredentials.get_application_default())
+
+    """
+    wb = gc.open_by_url(url)
+    df = pd.DataFrame(wb.worksheets()[0].get_all_values())
+    df.columns = df.iloc[0]
+    df = df.iloc[1:]
+    df.drop(['date', 'month', 'name', 'is_news_spam'], axis = 1, inplace = True)
+    df = df[df['is_spam'] != '']
+    df['is_news'] = df['is_news'].apply(lambda x: np.NaN if x == '' else x)
+    df['sentiment'] = df['sentiment'].apply(lambda x: np.NaN if x == '' else x)
+    schema = {
+        'text': df['text'].astype(str),
+        'is_spam': df['is_spam'].astype(float),
+        'is_news': df['is_news'].astype(float),
+        'sentiment': df['sentiment'].astype(float)
+    }
+    df = pd.DataFrame(schema).reset_index(drop = True)
+    df['is_spam'] = df['is_spam'].apply(lambda x: True if x == 1.0 else False)
+    return df
 
 def getSampleWithNames(dfWithMonth, monthsToSample, sampleSizePerMonth, language = 'en'):
     dfList = []
