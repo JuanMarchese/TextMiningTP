@@ -9,7 +9,29 @@ import numpy as np
 
 # Esta función es para poder asegurarme que el archivo cambió cuando lo importo en google colab
 def v():
-    print("2020-05-30 14:50")
+    print("2020-05-31 10:45")
+
+def loadTaggedDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/", version = "v1", months = [5, 6, 7, 8, 9, 10, 11]):
+    dataframe_list = []
+
+    versionPath = os.path.join(path, version)
+
+    # Estas columnas van a cambiar cuando agreguemos los valores de sentimiento
+    dtype = {
+        "date": str, 
+        "text": str, 
+        "language_proba": float,
+        "month": int,
+        "is_repeated": bool,
+        "is_spam": bool,
+        "is_news": bool
+        }
+
+    for i_month in months:
+        dataframe_list.append(pd.read_csv(os.path.join(versionPath, f'{str(i_month).zfill(2)}-tagged.csv.gz'),
+            quotechar='"', encoding = "utf-8", dtype=dtype, quoting=csv.QUOTE_NONNUMERIC, sep=";"))
+
+    return pd.concat(dataframe_list, axis=0, ignore_index=True)
 
 def loadDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/"):
     
