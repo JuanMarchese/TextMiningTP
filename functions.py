@@ -9,12 +9,13 @@ import numpy as np
 
 # Esta función es para poder asegurarme que el archivo cambió cuando lo importo en google colab
 def v():
-    print("2020-05-31 10:45")
+    print("2020-06-03 11:04")
 
 def loadTaggedDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dataset/", version = "v1", months = [5, 6, 7, 8, 9, 10, 11]):
     dataframe_list = []
 
     versionPath = os.path.join(path, version)
+    suffix = "tagged-emoji" if version == "v3" else "tagged"
 
     # Estas columnas van a cambiar cuando agreguemos los valores de sentimiento
     dtype = {
@@ -26,9 +27,12 @@ def loadTaggedDatasets(path = "/content/drive/My Drive/Datamining/TextMining/Dat
         "is_spam": bool,
         "is_news": bool
         }
+    
+    if(version == "v3"):
+        dtype.update({"emoji_sent_dico": str})
 
     for i_month in months:
-        dataframe_list.append(pd.read_csv(os.path.join(versionPath, f'{str(i_month).zfill(2)}-tagged.csv.gz'),
+        dataframe_list.append(pd.read_csv(os.path.join(versionPath, f'{str(i_month).zfill(2)}-{suffix}.csv.gz'),
             quotechar='"', encoding = "utf-8", dtype=dtype, quoting=csv.QUOTE_NONNUMERIC, sep=";"))
 
     return pd.concat(dataframe_list, axis=0, ignore_index=True)
@@ -145,11 +149,12 @@ def loadSampleDataSetFromSpread(gc, url):
     df = pd.DataFrame(wb.worksheets()[0].get_all_values())
     df.columns = df.iloc[0]
     df = df.iloc[1:]
-    df.drop(['date', 'month', 'name', 'is_news_spam'], axis = 1, inplace = True)
+    df.drop(['month', 'name', 'is_news_spam'], axis = 1, inplace = True)
     df = df[df['is_spam'] != '']
     df['is_news'] = df['is_news'].apply(lambda x: np.NaN if x == '' or x == ' ' else x)
     df['sentiment'] = df['sentiment'].apply(lambda x: np.NaN if x == '' or x == ' ' else x)
     schema = {
+        'date': df['date'].astype(str),
         'text': df['text'].astype(str),
         'is_spam': df['is_spam'].astype(float),
         'is_news': df['is_news'].astype(float),
